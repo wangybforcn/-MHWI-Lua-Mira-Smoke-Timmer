@@ -1,0 +1,131 @@
+--黑龙烟雾弹cd计时
+--tips 红烟10s不索敌，烟雾弹cd20s
+
+missionSwitch = false          --任务开关
+InSmkMessage = false      --进烟雾弹提示开关
+SmkCdMessage = false      --烟雾弹cd提示开关
+SmokeTimmerRunning = false      --函数运行开关
+
+function MiraSmokeTimmer()
+    --检索黑龙状态是否在索敌，解除索敌则开始计时，未解除则对烟雾弹进行计时
+    
+    SmokeTimmerRunning = true
+
+    local Data_map = engine.World:new()
+
+    local smkTimmerSwitch = false       --计时器开关
+    local smkCDTimmerSwitch = false        --烟雾弹cd计时器开关
+
+
+    --检索是否在虚黑城
+    if Data_map.MapId == 417 then
+
+        if missionSwitch == false then
+            Message("已检测到黑龙任务\n开启监控烟雾弹cd和烟雾弹生效时间计时功能")
+            missionSwitch = true
+        end
+
+        local monsterList = GetAllMonster()
+        local Data_Mira = nil
+
+        for monster, monsterData in pairs(monsterList) do
+            local Data_Monster = engine.Monster:new(monster)
+            Data_Mira = Data_Monster
+        end
+
+        --开始进行黑龙的索敌相关
+        --16395、16396为站立索敌1，21，16398为趴地索敌1，22
+        --getMonsterActionInfo
+
+        ::Mira_Action_Find::
+        --or (Data_Mira.Action.lmtID == 16398 and Data_Mira.Action.fsm == {fsmTarget == 1, fsmID == 22})) then
+        if Data_Mira.Action.lmtID == 16395 or Data_Mira.Action.lmtID == 16396 or Data_Mira.Action.lmtID == 16398 then
+            --进烟雾弹后
+
+            Message("开始10秒烟雾弹隐匿计时...")
+            AddChronoscope(8, "MiraInSmokeTimmer")
+        end
+
+        if not CheckChronoscope("MiraInSmokeTimmer") then
+            smkTimmerSwitch = false
+            Message("黑龙即将脱离烟雾弹索敌阶段，请注意！")
+        end
+        
+        if not (CheckChronoscope("MiraInSmokeTimmer") and smkTimmerSwitch != false) then
+            DelChronoscope("MiraInSmokeTimmer")
+            smkCDTimmerSwitch = true
+
+            AddChronoscope(23, "MiraSmokeCDTimmer")
+            Message("现在开始20秒烟雾弹计时\nTips:请按照提示为准不要自己倒计时！")
+        end
+
+        if not (CheckChronoscope("MiraSmokeCDTimmer") and smkCDTimmerSwitch == false) then
+            Message("黑龙20秒烟雾抗性已结束......")
+            smkCDTimmerSwitch = false
+            DelChronoscope("MiraSmokeCDTimmer")
+        end
+            --[[
+            smkTimmerSwitch = true
+            AddChronoscope(8, "MiraInSmokeTimmer")
+
+            if InSmkMessage == false then
+                Message("开始10秒烟雾弹隐匿计时...")
+                InSmkMessage = true
+            end
+            
+
+            if not CheckChronoscope("MiraInSmokeTimmer") then
+                smkTimmerSwitch = false
+                
+                if SmkCdMessage == false then
+                    Message("黑龙即将脱离烟雾弹索敌阶段，请注意！")
+                    SmkCdMessage = true
+                end
+            end
+
+            --烟雾弹cd计时
+            if not (CheckChronoscope("MiraInSmokeTimmer") and smkTimmerSwitch == false) then
+                DelChronoscope("MiraInSmokeTimmer")
+                smkCDTimmerSwitch = true
+
+                AddChronoscope(23, "MiraSmokeCDTimmer")
+                Message("现在开始20秒烟雾弹计时\nTips:请按照提示为准不要自己倒计时！")
+            end
+
+            if not CheckChronoscope("MiraSmokeCDTimmer")then
+                Message("黑龙20秒烟雾抗性已结束......")
+                smkCDTimmerSwitch = false
+                DelChronoscope("MiraSmokeCDTimmer")
+            end
+        end
+        --]]
+    end
+end
+
+function on_imgui()
+end
+
+--游戏初始化执行的代码
+function on_init()
+end
+
+--游戏每秒检测的代码
+function on_time()
+    if SmokeTimmerRunning == false then
+        MiraSmokeTimmer()
+        SmokeTimmerRunning = false
+    end
+end
+
+--每次切换场景执行的代码
+function on_switch_scenes()
+    missionSwitch = false
+end
+
+--每次生成怪物时执行的代码
+function on_monster_create()
+end
+
+--每次销毁怪物时执行的代码
+function on_monster_destroy()
+end
