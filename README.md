@@ -14,5 +14,5 @@ MHWI Lua MOD<br>
   ·将文件放入Monster Hunter World\Lua<br>
   ·重启游戏<br></pre>
 
-如果有bug请在issues或菜蘑菇链接中反馈，感谢支持<br>
+如果有bug请在issues或在<a href="https://www.caimogu.cc/post/1008077.html">踩蘑菇帖子</a>中反馈，感谢支持<br>
 但是我比较懒，可能随缘去修（x）
